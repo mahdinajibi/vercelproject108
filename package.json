@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/server/handler.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/index.html"
+    }
+  ]
+}
