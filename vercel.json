@@ -1,3 +1,0 @@
-"scripts": {
-  "run-app": "node internal_service/main.js"
-}
