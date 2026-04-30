@@ -1,8 +1,10 @@
 {
-  "version": 2,
-  "name": "vercel-xhttp-relay",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
-  ],
-  "trailingSlash": false
+  "name": "internal-network-tool",
+  "version": "2.1.4",
+  "description": "Custom connectivity module for internal services",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "node lib/core.js"
+  }
 }
