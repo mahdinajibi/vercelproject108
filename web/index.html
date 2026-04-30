@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+<head><title>Phantom</title></head>
+<body>
+<button onclick="go()">Run</button>
+<pre id="o"></pre>
+<script>
+async function go(){
+ let r=await fetch('/api/x');
+ let j=await r.json();
+ document.getElementById('o').innerText=JSON.stringify(j,null,2);
+}
+</script>
+</body>
+</html>

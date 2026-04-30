@@ -1,0 +1,8 @@
+{
+  "name": "phantom-layer",
+  "version": "9.9.9",
+  "type": "module",
+  "scripts": {
+    "start": "node core/index.js"
+  }
+}
