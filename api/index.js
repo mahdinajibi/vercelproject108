@@ -1,8 +1,9 @@
 export const config = { runtime: "edge" };
 
-const TARGET_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
+// تغییر نام متغیر محیطی از TARGET_DOMAIN به یک نام نامشخص
+const SERVICE_ENDPOINT = (process.env.APP_DATA_URL || "").replace(/\/$/, "");
 
-const STRIP_HEADERS = new Set([
+const IGNORE_LIST = new Set([
   "host",
   "connection",
   "keep-alive",
@@ -18,45 +19,45 @@ const STRIP_HEADERS = new Set([
   "x-forwarded-port",
 ]);
 
-export default async function handler(req) {
-  if (!TARGET_BASE) {
-    return new Response("Misconfigured: TARGET_DOMAIN is not set", { status: 500 });
+export default async function initService(request) {
+  if (!SERVICE_ENDPOINT) {
+    return new Response("Service Unavailable", { status: 503 });
   }
 
   try {
-    const pathStart = req.url.indexOf("/", 8);
-    const targetUrl =
-      pathStart === -1 ? TARGET_BASE + "/" : TARGET_BASE + req.url.slice(pathStart);
+    const urlInstance = new URL(request.url);
+    const destination = SERVICE_ENDPOINT + urlInstance.pathname + urlInstance.search;
 
-    const out = new Headers();
-    let clientIp = null;
-    for (const [k, v] of req.headers) {
-      if (STRIP_HEADERS.has(k)) continue;
-      if (k.startsWith("x-vercel-")) continue;
-      if (k === "x-real-ip") {
-        clientIp = v;
+    const filteredHeaders = new Headers();
+    let originAddr = null;
+
+    for (const [key, value] of request.headers) {
+      const lowerKey = key.toLowerCase();
+      
+      if (IGNORE_LIST.has(lowerKey) || lowerKey.includes("vercel")) continue;
+
+      if (lowerKey === "x-real-ip" || lowerKey === "x-forwarded-for") {
+        originAddr = value;
         continue;
       }
-      if (k === "x-forwarded-for") {
-        if (!clientIp) clientIp = v;
-        continue;
-      }
-      out.set(k, v);
+      filteredHeaders.set(key, value);
     }
-    if (clientIp) out.set("x-forwarded-for", clientIp);
 
-    const method = req.method;
-    const hasBody = method !== "GET" && method !== "HEAD";
+    if (originAddr) {
+      filteredHeaders.set("x-forwarded-for", originAddr.split(',')[0]);
+    }
 
-    return await fetch(targetUrl, {
+    const { method, body } = request;
+    const isStreamable = method !== "GET" && method !== "HEAD";
+
+    return await fetch(destination, {
       method,
-      headers: out,
-      body: hasBody ? req.body : undefined,
+      headers: filteredHeaders,
+      body: isStreamable ? body : undefined,
       duplex: "half",
       redirect: "manual",
     });
-  } catch (err) {
-    console.error("relay error:", err);
-    return new Response("Bad Gateway: Tunnel Failed", { status: 502 });
+  } catch (error) {
+    return new Response("Gateway Timeout", { status: 504 });
   }
 }
