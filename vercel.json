@@ -1,8 +1,8 @@
 {
-  "name": "internal-network-tool",
-  "version": "2.1.4",
-  "private": true,
-  "scripts": {
-    "start": "node lib/core.js"
-  }
+  "version": 3.2.8,
+  "name": "Project-X",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/core" }
+  ],
+  "trailingSlash": false
 }
