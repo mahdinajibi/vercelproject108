@@ -5,6 +5,6 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "node lib/core.js"
+    "start": "node api/core.js"
   }
 }
